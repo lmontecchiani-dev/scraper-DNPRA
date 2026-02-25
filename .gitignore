@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+.env
+
+# Project specific
+logs/
+*.log
+data/diag_captcha.png
+data/temp_captcha.png
+data/*_processed.png
+docs/ReporteSiac/procesado_*.xlsx
+docs/ReporteSiac/*_backup_*.xlsx
+
+# Local config (if user wants to keep it private)
+# config/mis_ajustes.yaml
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,16 @@
+# Configuración Central de Scraping
+# Todas las URLs y selectores deben ir aquí.
+
+general:
+  start_url: "https://www.dnrpa.gov.ar/portal_dnrpa/fabr_import2.php?EstadoCertificado=true"
+  input_excel_path: "docs/ReporteSiac/recepci02-973.xls"
+  timeout_seconds: 60
+  max_retries: 3
+
+selectors:
+  certificado_form:
+    option_radio: "//input[@name='tcert'][@value='N']"
+    vin_input: "//input[@name='vin']"
+    captcha_image: "//img[@alt='Código verificador']"
+    captcha_input: "//input[@name='verificador']"
+    submit_button: "//input[@name='boton']"
