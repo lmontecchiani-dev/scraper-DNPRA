@@ -80,7 +80,7 @@ class CaptchaBreaker:
                     "Si un caracter está tapado pero la forma base se parece a un número, deducilo pero devuelve solo números."
                 )
                 
-                target_model = 'gemini-1.5-flash-8b'  # 1000 req/dia gratis, mejor para captchas
+                target_model = 'gemini-2.0-flash'  # Verificado disponible en el entorno
                 
                 response = self.gemini_client.models.generate_content(
                     model=target_model,

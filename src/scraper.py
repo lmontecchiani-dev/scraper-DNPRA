@@ -114,9 +114,6 @@ class DnpraScraper:
 
             self.logger.info(f"Se encontraron {len(vins)} VINs pendientes.")
 
-            # Cargar el mapa Nacional/Importado desde Nro.Fabr.
-            tipo_map = self.data_handler.get_tipo_map()
-
             start_url = self.config["general"]["start_url"]
             selectors = self.config["selectors"]["certificado_form"]
             consecutive_errors = 0
@@ -132,13 +129,10 @@ class DnpraScraper:
                     # Navegar y entrar al iframe
                     self._navegar_y_cambiar_iframe(start_url)
 
-                    # --- PASO 1: Seleccionar Nacional o Importado según Nro.Fabr. ---
-                    tipo = tipo_map.get(str(vin), 'N')  # 'N'=Nacional, 'I'=Importado
-                    radio_xpath = f"//input[@name='tcert'][@value='{tipo}']"
-                    tipo_label = 'Nacional' if tipo == 'N' else 'Importado'
-                    self.logger.info(f"  -> Seleccionando tipo '{tipo_label}' ({tipo}) para VIN {vin}")
+                    # --- PASO 1: Seleccionar radio "Importado" ---
+                    self.logger.info("  -> Seleccionando tipo 'Nacional'...")
                     opt_radio = self.wait.until(
-                        EC.element_to_be_clickable((By.XPATH, radio_xpath))
+                        EC.element_to_be_clickable((By.XPATH, selectors["option_radio"]))
                     )
                     self.driver.execute_script(
                         "arguments[0].scrollIntoView({block: 'center'});", opt_radio
@@ -323,16 +317,25 @@ class DnpraScraper:
                 # Resolver con Gemini/EasyOCR
                 resultado = self.captcha_breaker.solve(captcha_path)
 
-                if resultado and len(resultado) >= 3:
+                if resultado and len(resultado) == 5:
                     # Escribir en el campo del captcha via JS también (más estable)
                     self.driver.execute_script(
                         "document.querySelector('input[name=\"verificador\"]').value = arguments[0];",
                         resultado
                     )
-                    self.logger.info(f"  -> Captcha resuelto: '{resultado}'")
+                    self.logger.info(f"  -> Captcha extraído: '{resultado}' (5 dígitos)")
                     return True
-
-                self.logger.warning(f"  Captcha ilegible '{resultado}' (intento {attempt+1}/{max_retries}).")
+                
+                # Si no tiene 5 dígitos, es casi seguro error en el OCR. 
+                # Refrescamos el captcha pulsando el link "Cargar nuevo código"
+                self.logger.warning(f"  Captcha con longitud incorrecta '{resultado}' ({len(str(resultado))} dígitos). Refrescando...")
+                try:
+                    refresh_btn = self.driver.find_element(By.XPATH, "//a[@title='Cargar nuevo código']")
+                    self.driver.execute_script("arguments[0].click();", refresh_btn)
+                    time.sleep(2)
+                except Exception:
+                    self.logger.error("  No se pudo encontrar el botón de refrescar captcha.")
+                
                 time.sleep(1)
 
             except Exception as e:
