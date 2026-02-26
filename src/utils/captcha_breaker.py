@@ -6,7 +6,11 @@ from PIL import Image
 import os
 import easyocr
 import time
+import shutil
+from datetime import datetime
+import httpx
 from google import genai
+from google.genai import types as genai_types
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,22 +29,31 @@ class CaptchaBreaker:
         if tesseract_cmd_path:
             pytesseract.pytesseract.tesseract_cmd = tesseract_cmd_path
             
-        # 1. Init Gemini (Nuevo SDK oficial google.genai)
-        self.gemini_ready = False
-        self.gemini_client = None
-        self.gemini_quota_failed = 0  # Contador de fallos 429 consecutivos
-        gemini_key = os.getenv("GEMINI_API_KEY")
-        if gemini_key:
-            try:
-                self.gemini_client = genai.Client(
-                    api_key=gemini_key
-                )
+        # 1. Init Gemini Farm (Soporte para múltiples API Keys)
+        self.gemini_clients = []
+        self.current_key_index = 0
+        self.exhausted_keys = set()
+        
+        gemini_keys_str = os.getenv("GEMINI_API_KEYS")
+        if gemini_keys_str:
+            keys = [k.strip() for k in gemini_keys_str.split(",") if k.strip()]
+            for i, key in enumerate(keys):
+                try:
+                    # HttpOptions con timeout de 30s para evitar colgadas por 503/disconnects
+                    client = genai.Client(
+                        api_key=key,
+                        http_options=genai_types.HttpOptions(timeout=30)
+                    )
+                    self.gemini_clients.append(client)
+                    logger.info(f"✅ Gemini Key #{i+1} configurada ({key[:5]}...{key[-5:]})")
+                except Exception as e:
+                    logger.error(f"Error configurando Gemini Key #{i+1}: {e}")
+            
+            if self.gemini_clients:
                 self.gemini_ready = True
-                logger.info("✅ Gemini API (SDK Moderno) configurada exitosamente.")
-            except Exception as e:
-                logger.error(f"Error configurando Gemini: {e}")
+                logger.info(f"🚀 Granja de Gemini inicializada con {len(self.gemini_clients)} llaves.")
         else:
-            logger.warning("No se encontró GEMINI_API_KEY en .env. Saltando Tier 1.")
+            logger.warning("No se encontró GEMINI_API_KEYS en .env. Saltando Tier 1.")
             
         # 2. Init EasyOCR
         logger.info("Cargando cerebro neuronal local de EasyOCR (puede demorar unos segundos la primera vez)...")
@@ -48,62 +61,69 @@ class CaptchaBreaker:
         logger.info("✅ EasyOCR inicializado en RAM.")
 
     def solve_with_gemini(self, image_path: str) -> str:
-        """ Motor Tier 1: Gemini en la Nube (API Nativa) con Reintentos y Backoff """
-        # Si ya sabemos que Gemini está quota-bloqueado, saltar directamente a EasyOCR
-        if not self.gemini_ready or not self.gemini_client:
+        """ Motor Tier 1: Gemini Farm con Rotación de Llaves y Reintentos """
+        if not self.gemini_ready or not self.gemini_clients:
             return ""
-        if self.gemini_quota_failed >= 3:
-            logger.info("⏭️ Gemini quota agotada. Usando EasyOCR directo...")
-            return ""
-        
-        # Throttling base: 2s para no saturar la API en uso normal.
-        # Se hace backoff exponencial solo cuando hay errores 429.
-        base_delay = 2
-        max_retries = 2
-        
-        for attempt in range(max_retries + 1):
-            if attempt > 0:
-                wait_time = 5 * (2 ** (attempt - 1))  # Backoff: 5s, 10s
-                logger.warning(f"⚠️ Reintento {attempt}/{max_retries} para Gemini. Esperando {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                logger.info(f"⏳ Enviando a Gemini (pausa {base_delay}s)...")
-                time.sleep(base_delay)
 
+        # Intentar con cada cliente disponible que no esté marcado como agotado
+        start_idx = self.current_key_index
+        for i in range(len(self.gemini_clients)):
+            idx = (start_idx + i) % len(self.gemini_clients)
+            
+            if idx in self.exhausted_keys:
+                continue
                 
-            try:
-                img = Image.open(image_path)
-                prompt = (
-                    "Esta es una imagen de un CAPTCHA con números fuertemente tachados por ruido adversario. "
-                    "Tu única tarea es leer los números (suele haber 5). "
-                    "Ignora absolutamente todas las rayas. Responde ÚNICAMENTE con la cadena de números (ejemplo: 12345) y nada más. "
-                    "Si un caracter está tapado pero la forma base se parece a un número, deducilo pero devuelve solo números."
-                )
-                
-                target_model = 'gemini-2.0-flash'  # Verificado disponible en el entorno
-                
-                response = self.gemini_client.models.generate_content(
-                    model=target_model,
-                    contents=[prompt, img]
-                )
-                text = response.text.strip()
-                text = "".join(filter(str.isdigit, text))
-                if text:
-                    return text
+            client = self.gemini_clients[idx]
+            
+            # Throttling base: 5s para respetar cuota free (15 RPM).
+            base_delay = 5
+            max_retries = 0  # Sin reintentos: si falla, rotamos a la siguiente llave
+            
+            for attempt in range(max_retries + 1):
+                if attempt > 0:
+                    wait_time = 5 * (2 ** (attempt - 1))
+                    logger.warning(f"⚠️ Reintento {attempt}/{max_retries} para Gemini (Key #{idx+1}). Esperando {wait_time}s...")
+                    time.sleep(wait_time)
                 else:
-                    logger.warning(f"Respuesta vacía de Gemini en intento {attempt}. Reintentando...")
+                    logger.info(f"⏳ Enviando a Gemini (Key #{idx+1}, pausa {base_delay}s)...")
+                    time.sleep(base_delay)
+                
+                try:
+                    img = Image.open(image_path)
+                    prompt = (
+                        "Esta es una imagen de un CAPTCHA con números fuertemente tachados por ruido adversario. "
+                        "Tu única tarea es leer los números (suele haber 5). "
+                        "Ignora absolutamente todas las rayas. Responde ÚNICAMENTE con la cadena de números (ejemplo: 12345) y nada más. "
+                        "Si un caracter está tapado pero la forma base se parece a un número, deducilo pero devuelve solo números."
+                    )
                     
-            except Exception as e:
-                error_msg = str(e)
-                if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
-                    self.gemini_quota_failed += 1
-                    logger.error(f"❌ Error de Cuota (429) en intento {attempt} (total fallos: {self.gemini_quota_failed}).")
-                    if attempt == max_retries:
-                        logger.error("Se agotaron los reintentos para Gemini.")
-                else:
-                    logger.error(f"Error inesperado en Gemini API (Intento {attempt}): {e}")
-                    break
+                    target_model = 'gemini-flash-latest'
+                    
+                    response = client.models.generate_content(
+                        model=target_model,
+                        contents=[prompt, img]
+                    )
+                    text = response.text.strip()
+                    text = "".join(filter(str.isdigit, text))
+                    if text:
+                        return text
+                    else:
+                        logger.warning(f"Respuesta vacía de Gemini (Key #{idx+1}) en intento {attempt}.")
+                        
+                except Exception as e:
+                    error_msg = str(e)
+                    if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                        logger.error(f"❌ Cuota Agotada (429) para Gemini Key #{idx+1}. Rotando...")
+                        self.exhausted_keys.add(idx)
+                        break
+                    elif "503" in error_msg or "UNAVAILABLE" in error_msg or "disconnected" in error_msg.lower() or "timed out" in error_msg.lower():
+                        logger.error(f"⚠️ Gemini Key #{idx+1} no disponible (503/timeout/disconnect). Rotando a siguiente llave...")
+                        break  # Rotar sin marcar como agotada permanentemente
+                    else:
+                        logger.error(f"Error en Gemini API (Key #{idx+1}, Intento {attempt}): {e}")
+                        break
         
+        logger.error("❌ CRÍTICO: Todas las llaves de la granja Gemini están agotadas o fallaron.")
         return ""
 
     def _preprocess_variants(self, img_bgr):
@@ -246,37 +266,62 @@ class CaptchaBreaker:
             logger.error(f"Error Tesseract Fallback: {e}")
             return ""
 
+    def _save_to_dataset(self, image_path: str, result: str):
+        """Guarda una copia del captcha en la carpeta de dataset para futuro entrenamiento."""
+        try:
+            dataset_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "dataset")
+            os.makedirs(dataset_dir, exist_ok=True)
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            # Si no hay resultado o es inválido, marcamos como fallido
+            label = result if (result and len(result) == 5) else f"FAILED_{result or 'NONE'}"
+            
+            filename = f"{timestamp}_{label}.png"
+            dest_path = os.path.join(dataset_dir, filename)
+            
+            shutil.copy2(image_path, dest_path)
+            logger.info(f"💾 Captcha guardado en dataset: {filename}")
+        except Exception as e:
+            logger.error(f"Error guardando en dataset: {e}")
+
     def solve(self, image_path: str) -> str:
         """
         Método unificado. 
         Intenta Gemini -> EasyOCR -> Tesseract en cascada garantizando máxima robustez.
         """
         logger.debug(f"=== Iniciando Extracción en Cascada: {os.path.basename(image_path)} ===")
+        final_result = ""
         
-        # 1. TIER 1: Gemini 2.0 Flash
-        gemini_result = self.solve_with_gemini(image_path)
-        if gemini_result and len(gemini_result) >= 3:
-            logger.info(f"✅ [TIER 1 - Nube] DNPRA CAPTCHA resuelto por Gemini 2.0: '{gemini_result}'")
-            return gemini_result
-            
-        logger.warning(f"Gemini falló o devolvió vacío (Res: '{gemini_result}'). Activando Fallback Local...")
+        # 1. TIER 1: Gemini 
+        final_result = self.solve_with_gemini(image_path)
         
-        # 2. TIER 2: EasyOCR Multi-Estrategia
-        easy_result = self.solve_with_easyocr(image_path)
-        if easy_result and len(easy_result) >= 3:
-            logger.info(f"✅ [TIER 2 - Local DL] DNPRA CAPTCHA resuelto por EasyOCR: '{easy_result}'")
-            return easy_result
+        # 2. TIER 2: Fallback EasyOCR (si Gemini no devolvió 5 dígitos)
+        if not (final_result and len(final_result) == 5):
+            if final_result:
+                logger.warning(f"Gemini devolvió longitud incorrecta ({len(final_result)}). Probando EasyOCR...")
+            else:
+                logger.warning("Gemini falló. Activando Fallback Local con EasyOCR...")
             
-        logger.warning(f"EasyOCR no extrajo 5 digitos (Res: '{easy_result}'). Activando último recurso Tesseract...")
+            easy_result = self.solve_with_easyocr(image_path)
+            if easy_result and len(easy_result) == 5:
+                final_result = easy_result
+                logger.info(f"✅ [TIER 2] Resuelto por EasyOCR: '{final_result}'")
+            
+        # 3. TIER 3: Fallback Tesseract (si todo lo anterior falló)
+        if not (final_result and len(final_result) == 5):
+            logger.warning("EasyOCR falló. Probando Tesseract como último recurso...")
+            tesseract_result = self.solve_with_tesseract(image_path)
+            if tesseract_result:
+                final_result = tesseract_result
+                logger.info(f"✅ [TIER 3] Resuelto por Tesseract: '{final_result}'")
+
+        # Guardar en dataset para entrenamiento futuro
+        self._save_to_dataset(image_path, final_result)
         
-        # 3. TIER 3: Tesseract
-        tesseract_result = self.solve_with_tesseract(image_path)
-        if tesseract_result:
-            logger.info(f"✅ [TIER 3 - Classic OCR] DNPRA CAPTCHA resuelto por Tesseract: '{tesseract_result}'")
-            return tesseract_result
+        if not final_result:
+            logger.error("❌ CRÍTICO: Todos los motores fallaron.")
             
-        logger.error("❌ CRÍTICO: Los 3 motores (Gemini, EasyOCR, Tesseract) fallaron al extraer el texto.")
-        return ""
+        return final_result
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

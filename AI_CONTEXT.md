@@ -23,7 +23,7 @@ El proyecto sigue una arquitectura modular estricta para garantizar escalabilida
 
 - **Runtime**: Python 3.10+
 - **Scraping Engine**: Selenium + webdriver-manager
-- **OCR**: EasyOCR (Local CPU), Gemini 2.0 Flash (IA API)
+- **OCR**: EasyOCR (Local CPU), Gemini Flash Latest (API Key Farm / Granja)
 - **Data Manipulation**: Pandas, Openpyxl
 - **Config Management**: PyYAML, python-dotenv
 
@@ -48,8 +48,10 @@ El sistema opera de forma desatendida y resiliente:
     - Antes de cada consulta, lee `Nro.Fabr.`.
     - Si el dígito en índice 3 es '2' → Click en Importado. Caso contrario → Nacional.
 3.  **Motor de OCR (Cascada Multi-Nivel)**:
-    - **Tier 1 (Nube)**: `gemini-2.0-flash` (IA Nativa) para máxima precisión. Auto-bypass si la cuota se agota.
-    - **Tier 2 (Soberanía Local)**: EasyOCR con **16 estrategias de pre-procesamiento** (OTSU, HSV, CLAHE, Bilateral) y sistema de votación.
+    - **Tier 1 (Nube)**: **Granja de API Keys** (`gemini-flash-latest`). Rotación automática entre múltiples llaves si una agota su cuota (429).
+    - **Tier 2 (Soberanía Local)**: EasyOCR con **16 estrategias de pre-procesamiento** (OTSU, HSV, CLAHE, Bilateral) y sistema de votación. Se activa solo si TODAS las llaves de la granja fallan.
+    - **Prioridad de Resultado**: Se prioriza el **Dominio/Patente** sobre estados genéricos ("Vigente"). Si se encuentra la patente, se guarda en ambas columnas de resultado.
+    - **Dataset Collection**: Todas las capturas enviadas a los motores de OCR se guardan automáticamente en `data/dataset/` con el formato `[timestamp]_[resultado].png` para futuro re-entrenamiento del modelo local.
     - **Validación 5D**: Se exige exactamente 5 dígitos. Si el OCR falla (ej. lee 3 números), el bot clickea en **"Cargar nuevo código"** para refrescar el captcha y reintentar.
 4.  **Cierre de Ciclo**:
     - Extrae el Dominio/Patente de la página de resultados vía regex.

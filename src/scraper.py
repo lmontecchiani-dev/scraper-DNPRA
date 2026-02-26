@@ -35,8 +35,8 @@ class DnpraScraper:
         self.data_handler = DataHandler(excel_abs_path)
 
     def _kill_stray_processes(self):
-        """Mata procesos de Chrome y ChromeDriver que hayan quedado colgados."""
-        for proc in ["chromedriver.exe", "chrome.exe"]:
+        """Mata procesos de ChromeDriver colgados. NO toca chrome.exe para no cerrar las ventanas del usuario."""
+        for proc in ["chromedriver.exe"]:  # Solo chromedriver, chrome.exe se gestiona a través de driver.quit()
             try:
                 subprocess.run(
                     ["taskkill", "/F", "/IM", proc],
@@ -185,16 +185,18 @@ class DnpraScraper:
                         self.driver.execute_script("arguments[0].click();", submit_btn)
 
                     # --- PASO 5: Leer Resultado ---
-                    time.sleep(3)
+                    time.sleep(4)
                     try:
-                        # Salir del iframe para leer el resultado (el portal lo renderiza en el main doc)
+                        # NOTA: En este portal, el resultado suele aparecer dentro del mismo iframe.
+                        # No salimos a default_content() a menos que el iframe desaparezca.
                         try:
-                            self.driver.switch_to.default_content()
+                            body_text = self.driver.find_element(By.TAG_NAME, "body").text
                         except Exception:
-                            pass
+                            self.logger.warning("  No se pudo leer el body del iframe, reintentando en default_content...")
+                            self.driver.switch_to.default_content()
+                            body_text = self.driver.find_element(By.TAG_NAME, "body").text
 
-                        body_text = self.driver.find_element(By.TAG_NAME, "body").text
-                        self.logger.info(f"  -> BODY:\n{body_text[:400]}")
+                        self.logger.info(f"  -> Resultado obtenido ({len(body_text)} caracteres).")
                         body_lower = body_text.lower()
 
                         import re
@@ -216,13 +218,13 @@ class DnpraScraper:
                             dominio = dominio_match.group(1) if dominio_match else ""
                             dominios[vin] = dominio
 
-                            # Clasificar el resultado
-                            if "vencido" in body_lower:
+                            # Clasificar el resultado (Prioridad: Dominio > Vencido > Vigente)
+                            if dominio:
+                                results[vin] = dominio
+                            elif "vencido" in body_lower:
                                 results[vin] = "Vencido"
                             elif "vigente" in body_lower:
                                 results[vin] = "Vigente"
-                            elif dominio:
-                                results[vin] = "Encontrado"
                             else:
                                 results[vin] = "Consultado"
 

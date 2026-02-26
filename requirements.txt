@@ -1,0 +1,25 @@
+# --- Core y Entorno ---
+python-dotenv>=1.0.0
+
+# --- Web Scraping y Manejo de Navegador ---
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+
+# --- Transformación de Datos y ETL ---
+pandas>=2.1.0
+xlrd>=2.0.1
+openpyxl>=3.1.0
+
+# --- Configuración y Contexto ---
+PyYAML>=6.0
+
+# --- Testing ---
+pytest>=7.4.0
+
+# --- AI y OCR ---
+google-genai
+easyocr
+opencv-python>=4.8.0
+pytesseract>=0.3.10
+Pillow>=10.0.0
+winsdk
