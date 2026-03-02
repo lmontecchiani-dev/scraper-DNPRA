@@ -1,0 +1,321 @@
+{
+    "title": "Grabación del 25/2/2026 a las 05:08:05",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1198,
+            "height": 672,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "chrome://new-tab-page/",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "chrome://new-tab-page/",
+                    "title": "Nueva pestaña"
+                }
+            ]
+        },
+        {
+            "type": "navigate",
+            "url": "https://www.dnrpa.gov.ar/portal_dnrpa/fabr_import2.php?EstadoCertificado=true",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://www.dnrpa.gov.ar/portal_dnrpa/fabr_import2.php?EstadoCertificado=true",
+                    "title": ""
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "tr input:nth-of-type(2)"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr/td/input[2]"
+                ],
+                [
+                    "pierce/tr input:nth-of-type(2)"
+                ]
+            ],
+            "offsetY": 7.049995422363281,
+            "offsetX": 9.75,
+            "frame": [
+                0
+            ],
+            "assertedEvents": [
+                {
+                    "type": "navigation"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/ * VIN: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(3) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[3]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(3) input"
+                ]
+            ],
+            "offsetY": 15.762496948242188,
+            "offsetX": 153.79999923706055,
+            "frame": [
+                0
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/ * VIN: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(3) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[3]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(3) input"
+                ]
+            ],
+            "offsetY": 15.762496948242188,
+            "offsetX": 153.79999923706055,
+            "frame": [
+                0
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/ * VIN: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(3) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[3]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(3) input"
+                ]
+            ],
+            "offsetY": 10.762496948242188,
+            "offsetX": 190.79999923706055,
+            "frame": [
+                0
+            ]
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "Meta"
+        },
+        {
+            "type": "keyUp",
+            "key": "Meta",
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "v",
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "9BRK4AAG6T0229892",
+            "selectors": [
+                [
+                    "aria/ * VIN: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(3) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[3]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(3) input"
+                ]
+            ],
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/* Código verificador: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(6) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[6]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(6) input"
+                ]
+            ],
+            "offsetY": 15.962493896484375,
+            "offsetX": 36.649993896484375,
+            "frame": [
+                0
+            ]
+        },
+        {
+            "type": "change",
+            "value": "42775",
+            "selectors": [
+                [
+                    "aria/* Código verificador: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(6) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[6]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(6) input"
+                ]
+            ],
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Aceptar"
+                ],
+                [
+                    "input[type='submit']"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[7]/td/input[1]"
+                ],
+                [
+                    "pierce/input[type='submit']"
+                ],
+                [
+                    "text/Aceptar"
+                ]
+            ],
+            "offsetY": 5.762481689453125,
+            "offsetX": 37.39999961853027,
+            "frame": [
+                0
+            ],
+            "assertedEvents": [
+                {
+                    "type": "navigation"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(2)"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/div[2]"
+                ],
+                [
+                    "pierce/div:nth-of-type(2)"
+                ]
+            ],
+            "offsetY": 12.162498474121094,
+            "offsetX": 629,
+            "frame": [
+                0
+            ],
+            "duration": 372
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(3)"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/div[3]"
+                ],
+                [
+                    "pierce/div:nth-of-type(3)"
+                ]
+            ],
+            "offsetY": 3.5625,
+            "offsetX": 425,
+            "frame": [
+                0
+            ],
+            "duration": 920.0999999977648
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(3)"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/div[3]"
+                ],
+                [
+                    "pierce/div:nth-of-type(3)"
+                ]
+            ],
+            "offsetY": 2.5625,
+            "offsetX": 399,
+            "frame": [
+                0
+            ],
+            "button": "secondary"
+        }
+    ]
+}

@@ -61,5 +61,5 @@ El sistema opera de forma desatendida y resiliente:
 ## 6. Operación y Mantenimiento
 
 - **Control de Versiones**: Repositorio oficial en [GitHub](https://github.com/lmontecchiani-dev/scraper-DNPRA).
-- **Ejecución**: `.\.venv\Scripts\python.exe src/main.py`
-- **Estado Actual**: Producción-Ready. Sistema de 5-dígitos con refresco automático implementado el 25/02/2026.
+- **Ejecución**: Se recomienda el uso del CLI interactivo: `.\scripts\menu.ps1`
+- **Estado Actual**: Producción-Ready. Granja de 7 llaves operativa con timeouts optimizados y manejo de errores 503/404 mejorado (26/02/2026).

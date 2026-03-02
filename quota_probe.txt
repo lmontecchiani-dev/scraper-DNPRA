@@ -1,0 +1,4 @@
+Model: gemini-2.0-flash | Status: 400 | Error: API key expired. Please renew the API key.
+Model: gemini-2.0-flash-lite | Status: 400 | Error: API key expired. Please renew the API key.
+Model: gemini-1.5-flash | Status: 404 | Error: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Model: gemini-2.0-flash-exp | Status: 400 | Error: API key expired. Please renew the API key.

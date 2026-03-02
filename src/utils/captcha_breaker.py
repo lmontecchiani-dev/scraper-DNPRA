@@ -40,10 +40,7 @@ class CaptchaBreaker:
             for i, key in enumerate(keys):
                 try:
                     # HttpOptions con timeout de 30s para evitar colgadas por 503/disconnects
-                    client = genai.Client(
-                        api_key=key,
-                        http_options=genai_types.HttpOptions(timeout=30)
-                    )
+                    client = genai.Client(api_key=key)
                     self.gemini_clients.append(client)
                     logger.info(f"✅ Gemini Key #{i+1} configurada ({key[:5]}...{key[-5:]})")
                 except Exception as e:
@@ -97,10 +94,8 @@ class CaptchaBreaker:
                         "Si un caracter está tapado pero la forma base se parece a un número, deducilo pero devuelve solo números."
                     )
                     
-                    target_model = 'gemini-flash-latest'
-                    
                     response = client.models.generate_content(
-                        model=target_model,
+                        model='gemini-flash-latest',
                         contents=[prompt, img]
                     )
                     text = response.text.strip()
@@ -112,15 +107,26 @@ class CaptchaBreaker:
                         
                 except Exception as e:
                     error_msg = str(e)
+                    logger.debug(f"DEBUG: Gemini Error completo: {error_msg}")
+                    
                     if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
                         logger.error(f"❌ Cuota Agotada (429) para Gemini Key #{idx+1}. Rotando...")
                         self.exhausted_keys.add(idx)
                         break
-                    elif "503" in error_msg or "UNAVAILABLE" in error_msg or "disconnected" in error_msg.lower() or "timed out" in error_msg.lower():
-                        logger.error(f"⚠️ Gemini Key #{idx+1} no disponible (503/timeout/disconnect). Rotando a siguiente llave...")
-                        break  # Rotar sin marcar como agotada permanentemente
+                    elif "503" in error_msg or "UNAVAILABLE" in error_msg:
+                        logger.error(f"⚠️ Servidor Sobrecargado (503) para Gemini Key #{idx+1}. Rotando...")
+                        break
+                    elif "404" in error_msg:
+                        logger.error(f"⚠️ Modelo No Encontrado (404) para Gemini Key #{idx+1}. Intentando fallback...")
+                        # Fallback a gemini-flash-latest si 1.5-flash falla
+                        try:
+                            response = client.models.generate_content(model='gemini-flash-latest', contents=[prompt, img])
+                            text = "".join(filter(str.isdigit, response.text.strip()))
+                            if text: return text
+                        except: pass
+                        break
                     else:
-                        logger.error(f"Error en Gemini API (Key #{idx+1}, Intento {attempt}): {e}")
+                        logger.error(f"❌ Error Crítico Gemini (Key #{idx+1}): {error_msg}")
                         break
         
         logger.error("❌ CRÍTICO: Todas las llaves de la granja Gemini están agotadas o fallaron.")

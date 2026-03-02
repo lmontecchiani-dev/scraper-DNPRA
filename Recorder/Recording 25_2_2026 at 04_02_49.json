@@ -1,0 +1,327 @@
+{
+    "title": "Recording 25/2/2026 at 04:02:49",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 796,
+            "height": 584,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://www.dnrpa.gov.ar/portal_dnrpa/fabr_import2.php?EstadoCertificado=true",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://www.dnrpa.gov.ar/portal_dnrpa/fabr_import2.php?EstadoCertificado=true",
+                    "title": ""
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "tr input:nth-of-type(2)"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr/td/input[2]"
+                ],
+                [
+                    "pierce/tr input:nth-of-type(2)"
+                ]
+            ],
+            "offsetY": 7.84375,
+            "offsetX": 12.34375,
+            "frame": [
+                0
+            ],
+            "assertedEvents": [
+                {
+                    "type": "navigation"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/ * VIN: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(3) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[3]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(3) input"
+                ]
+            ],
+            "offsetY": 6.5625,
+            "offsetX": 127.40625,
+            "frame": [
+                0
+            ]
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "Alt"
+        },
+        {
+            "type": "keyUp",
+            "key": "Tab",
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/ * VIN: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(3) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[3]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(3) input"
+                ]
+            ],
+            "offsetY": 11.5625,
+            "offsetX": 92.40625,
+            "frame": [
+                0
+            ]
+        },
+        {
+            "type": "change",
+            "value": "9BRK4AAG6T0229892",
+            "selectors": [
+                [
+                    "aria/ * VIN: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(3) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[3]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(3) input"
+                ]
+            ],
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/* Código verificador: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(6) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[6]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(6) input"
+                ]
+            ],
+            "offsetY": 10.5625,
+            "offsetX": 27.25,
+            "frame": [
+                0
+            ]
+        },
+        {
+            "type": "change",
+            "value": "56517",
+            "selectors": [
+                [
+                    "aria/* Código verificador: ",
+                    "aria/[role=\"textbox\"]"
+                ],
+                [
+                    "tr:nth-of-type(6) input"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[6]/td/div/input"
+                ],
+                [
+                    "pierce/tr:nth-of-type(6) input"
+                ]
+            ],
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Aceptar"
+                ],
+                [
+                    "input[type='submit']"
+                ],
+                [
+                    "xpath///*[@id=\"imprimir\"]/form/table/tbody/tr[7]/td/input[1]"
+                ],
+                [
+                    "pierce/input[type='submit']"
+                ],
+                [
+                    "text/Aceptar"
+                ]
+            ],
+            "offsetY": 5.5625,
+            "offsetX": 14,
+            "frame": [
+                0
+            ],
+            "assertedEvents": [
+                {
+                    "type": "navigation"
+                }
+            ]
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "x"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "|"
+        },
+        {
+            "type": "keyUp",
+            "key": "|",
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "x",
+            "frame": [
+                0
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "frame": [
+                0
+            ],
+            "target": "main",
+            "key": "Alt"
+        }
+    ]
+}

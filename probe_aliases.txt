@@ -1,0 +1,2 @@
+Model: gemini-flash-latest | Status: 200 | Error: OK
+Model: gemini-flash-lite-latest | Status: 200 | Error: OK

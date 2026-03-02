@@ -4,30 +4,30 @@
 # =============================================
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$botProcess = $null
 
 function Get-BotPid {
     Get-CimInstance Win32_Process -Filter "Name='python.exe'" | 
-        Where-Object { $_.CommandLine -like "*src\main.py*" -or $_.CommandLine -like "*src/main.py*" } |
-        Select-Object -First 1 -ExpandProperty ProcessId
+    Where-Object { $_.CommandLine -like "*src\main.py*" -or $_.CommandLine -like "*src/main.py*" } |
+    Select-Object -First 1 -ExpandProperty ProcessId
 }
 
 function Show-Status {
-    $pid = Get-BotPid
-    if ($pid) {
+    $botPid = Get-BotPid
+    if ($botPid) {
         Write-Host "  Estado: " -NoNewline
         Write-Host "CORRIENDO " -ForegroundColor Green -NoNewline
-        Write-Host "(PID $pid)"
-    } else {
+        Write-Host "(PID $botPid)"
+    }
+    else {
         Write-Host "  Estado: " -NoNewline
         Write-Host "DETENIDO" -ForegroundColor Red
     }
 }
 
 function Start-Bot {
-    $pid = Get-BotPid
-    if ($pid) {
-        Write-Host "`n  El bot ya esta corriendo (PID $pid)." -ForegroundColor Yellow
+    $botPid = Get-BotPid
+    if ($botPid) {
+        Write-Host "`n  El bot ya esta corriendo (PID $botPid)." -ForegroundColor Yellow
         return
     }
     Write-Host "`n  Iniciando bot..." -ForegroundColor Cyan
@@ -35,22 +35,23 @@ function Start-Bot {
     $main = Join-Path $projectRoot "src\main.py"
     Start-Process -FilePath $venv -ArgumentList $main -WorkingDirectory $projectRoot -WindowStyle Normal
     Start-Sleep -Seconds 2
-    $pid = Get-BotPid
-    if ($pid) {
-        Write-Host "  Bot iniciado correctamente (PID $pid)." -ForegroundColor Green
-    } else {
+    $botPid = Get-BotPid
+    if ($botPid) {
+        Write-Host "  Bot iniciado correctamente (PID $botPid)." -ForegroundColor Green
+    }
+    else {
         Write-Host "  No se pudo confirmar el inicio. Revisa la ventana de Chrome." -ForegroundColor Yellow
     }
 }
 
 function Stop-Bot {
-    $pid = Get-BotPid
-    if (-not $pid) {
+    $botPid = Get-BotPid
+    if (-not $botPid) {
         Write-Host "`n  El bot no esta corriendo." -ForegroundColor Yellow
         return
     }
-    Write-Host "`n  Deteniendo bot (PID $pid)..." -ForegroundColor Cyan
-    Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+    Write-Host "`n  Deteniendo bot (PID $botPid)..." -ForegroundColor Cyan
+    Stop-Process -Id $botPid -Force -ErrorAction SilentlyContinue
     # Matar chromedriver huerfano (NO chrome.exe)
     Get-Process "chromedriver" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 1
@@ -62,7 +63,8 @@ function Show-Logs {
     if (Test-Path $logFile) {
         Write-Host "`n  -- Ultimas 30 lineas del log --" -ForegroundColor Cyan
         Get-Content $logFile -Tail 30
-    } else {
+    }
+    else {
         Write-Host "`n  No hay log para hoy todavia." -ForegroundColor Yellow
     }
 }
